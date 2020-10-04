@@ -1,0 +1,285 @@
+---
+title: "COVID-19 Datathon Bolivia"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(ggplot2)
+library(tidyverse)
+library(readr)
+library(magrittr)
+library(dplyr)
+
+```
+
+```{r echo=FALSE, eval=FALSE}
+#IMPORTAR DATOS DATA SET DATA SET ENCUESTA NACIONAL DE HOGARES
+#INE_Encuenta nacional de hogares -->EH2019_Pers_csv.csv
+```
+
+```{r}
+library(readr)
+data_encuesta_nacional_hogares <- read_delim("C:/Users/evolucion/Documents/dataThonR/CienciaDatosCovid19/Data/INE/EH2019_Pers_csv.csv",";", escape_double = FALSE, trim_ws = TRUE)
+```
+
+```{r echo=FALSE, eval=FALSE}
+>TRANSFORMANDO DATA INE ENCUESTA NACIONAL DE HOGARES
+>Reduciendo las observaciones a aquellas que sean de nuestro interes
+
+>OBTENIENDO DATA DE PERSONAS NO ASEGURADAS POR DE DEPARTAMENTO
+```
+
+
+```{r}
+
+data_no_asegurados <- data_encuesta_nacional_hogares %>% 
+  filter( s04a_04a == "6. Ninguno?") %>%
+  group_by(depto) %>% 
+   summarise(no_asegurados = (count = n()))
+
+```
+
+```{r echo=FALSE, eval=FALSE}
+>OBTENIENDO DATA DE PERSONAS ASEGURADOS POR DEPARTAMENTO
+```
+
+
+```{r}
+
+data_asegurados <- data_encuesta_nacional_hogares %>% 
+  filter( s04a_04a != "6. Ninguno?") %>%
+  group_by(depto) %>% 
+   summarise(asegurados = (count = n()))
+
+```
+
+```{r echo=FALSE, eval=FALSE}
+>UNIENDO DATA ASEGURADOS Y NO ASEGURADOS
+
+```
+
+
+```{r}
+data_seguros <- data_asegurados %>%
+  inner_join(data_no_asegurados, by = c("depto" = "depto"))
+
+```
+
+```{r echo=FALSE, eval=FALSE}
+>Adicionando columa Total Personas=asegurados + no_asegurados
+```
+
+
+```{r}
+data_seguros_proporcion <-  data_seguros %>%
+  mutate( total_personas = asegurados + no_asegurados)
+```
+
+```{r echo=FALSE, eval=FALSE}
+>Adicionando columna de proporcion de asegurados y no asegurados
+```
+
+
+```{r}
+data_seguros_proporcion <-  data_seguros_proporcion %>%
+  mutate( proporcion_asegurados = (asegurados * 100)/total_personas) %>%
+  mutate( proporcion_no_asegurados = (no_asegurados * 100)/total_personas)
+
+data_seguros_proporcion[7,1] = "Potosi"
+
+```
+
+```{r echo=FALSE, eval=FALSE}
+>/////////////////////
+>CASOS COVID9 RECUPERADOS MUERTOS 
+>Data Sets : COVID19 Recuperados por departamento
+>Fecha : 10/03/2020 al 03/09/2020
+```
+
+
+```{r}
+depto = c("Beni", "Chuquisaca", "Cochabamba", "La Paz", "Oruro", "Pando", "Potosi", "Santa Cruz", "Tarija")
+confirmados = c(6753,5433,12559,31232,5086,2340,5861,40885,8632)
+recuperados = c(1084,2072,8520,12260,1946,381,1002,32823,3986)
+muertos = c(336,409,963,913,269,150,200,1890,213)
+
+data_covid9 <- data.frame(depto, confirmados, recuperados, muertos)
+data_covid9 <- tbl_df(data_covid9)
+
+
+```
+
+```{r echo=FALSE, eval=FALSE}
+
+>Adicionar columna tratamiento
+```
+
+
+```{r}
+data_covid9 <- data_covid9%>%
+  mutate(tratamiento = confirmados - recuperados)
+
+
+```
+
+```{r echo=FALSE, eval=FALSE}
+>Adicionando columna de propocion recuperados y tratamiento
+
+```
+
+
+```{r}
+data_covid9_proporcion <- data_covid9 %>%
+  mutate(proporcion_recuperados = (recuperados * 100)/confirmados) %>%
+  mutate(proporcion_tratamiento = (tratamiento *100)/confirmados)
+
+```
+
+```{r echo=FALSE, eval=FALSE}
+>concertir el tipo de dato factor a chr
+```
+
+
+
+```{r}
+
+data_covid9_proporcion$depto <- as.character(data_covid9_proporcion$depto)
+
+```
+
+```{r echo=FALSE, eval=FALSE}
+
+>>/////////////////////////////////////
+>>COMBINAR LOS DATA FRAMES data_covid9_proporcion Y data_seguros_proporcion
+```
+
+
+```{r}
+
+data_covid9_seguros_proporcion <- data_covid9_proporcion %>%
+  inner_join(data_seguros_proporcion, by = c("depto" = "depto"))
+```
+
+```{r echo=FALSE, eval=FALSE}
+>Transformando
+>1.---- Reduciendo las observaciones a los campos de interes 
+
+```
+
+```{r}
+data_covid9_seguros_depto <- data_covid9_seguros_proporcion %>%
+  select(depto, proporcion_recuperados, proporcion_tratamiento, proporcion_asegurados, proporcion_no_asegurados)
+
+```
+
+```{r echo=FALSE, eval=FALSE}
+>2.---- Reduciendo las observaciones a los campos de interes 
+```
+
+
+```{r}
+data_covid9_seguros_depto_ <- data_covid9_seguros_proporcion %>%
+  select(depto, proporcion_recuperados, proporcion_asegurados)
+```
+
+```{r echo=FALSE, eval=FALSE}
+>Transformando datos de la data data_propor_covid9_asegurados_departamento_
+>1.----
+```
+
+```{r }
+data_covid9_seguros_depto_1 <- data_covid9_seguros_depto  %>%
+  select(depto, proporcion_recuperados, proporcion_tratamiento, proporcion_asegurados, proporcion_no_asegurados)  %>%
+  gather(key = "Casos", value = "total_casos", -depto)
+
+
+```
+
+```{r echo=FALSE, eval=FALSE}
+>2.----
+```
+
+```{r}
+data_covid9_seguros_depto_2 <- data_covid9_seguros_depto  %>%
+  select(depto, proporcion_recuperados,proporcion_asegurados)  %>%
+  gather(key = "Casos", value = "total_casos", -depto)
+
+```
+
+# Pregunta 1
+
+Column
+--------------------------------------------------
+
+
+# Pregunta 2
+
+Column
+--------------------------------------------------
+
+# Pregunta 3
+
+Column
+--------------------------------------------------
+
+
+# Pregunta 4
+
+Column
+--------------------------------------------------
+
+# Pregunta 5 {data-orientation=rows}
+
+Row {data-height=70}
+-------------------------------------------------
+### Descripcion
+```{}
+Analisis de Datos COVID-19 Recuperados y Asegurados
+Para conocer si:
+El departamento x con más personas aseguradas tuvieron más recuperados
+```
+
+Row {.tabset}
+-------------------------------------------------
+### Data Set
+```{r}
+library(knitr)
+kable(data_covid9_seguros_proporcion)
+
+```
+
+### Grafico 1
+```{r}
+
+ggplot(data_covid9_seguros_depto_2, aes(depto, total_casos))+
+     geom_bar( aes(fill= Casos), position = "dodge", stat = "identity", show.legend = TRUE)+
+      scale_fill_manual(values = c("blue", "turquoise"))+
+        theme(axis.text.x = element_text(angle = 45,size = 8))+
+         ggtitle("Relacion recuperados Covid-19 y asegurados")+
+          labs( y = "Porcentaje de casos")+
+            labs( x = "Departamento")
+
+```
+
+### Grafico 2
+
+```{r}
+
+ggplot(data_covid9_seguros_depto_1, aes(x=depto, y=total_casos, fill= Casos ))+
+     geom_bar( position = "dodge", stat = "identity", show.legend = TRUE)+
+      scale_fill_manual(values = c("blue", "turquoise", "orange", "red"))+
+   ggtitle("Numero de Casos cOVID19 y asegurados )")+
+          labs( y = "Porcentaje de casos")+
+            labs( x = "Departamento")+      
+  theme(axis.text.x = element_text(angle = 45,size = 8))
+
+```
+
+
+
+
+
