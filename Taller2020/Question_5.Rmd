@@ -8,8 +8,6 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
-
-
 # El departamento x con más personas aseguradas tuvieron más recuperados. (V/F)
 
 Vamos hacer un analisis exploratorio de datos:
