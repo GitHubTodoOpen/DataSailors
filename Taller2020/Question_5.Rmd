@@ -41,17 +41,13 @@ library(readr)
 library(magrittr)
 library(dplyr)
 ```
-
-```{r echo=FALSE, eval=FALSE}
-Bueno, para tener una mejor impresión al momento de visualizar los resultados se crea un tema.
-
-```
-
+Tema para visualizacion de datos
 
 ```{r}
 tema_plot <- 
   theme_minimal() +
   theme(
+    axis.text.x = element_text(angle = 45,size = 8),
     panel.grid.minor = element_blank(),
     panel.grid.major.x =  element_blank(),
     strip.background = element_rect(fill = "#eeeeee", color = NA) 
@@ -244,11 +240,11 @@ data_covid9_seguros_depto_2
 ggplot(data_covid9_seguros_depto_1, aes(depto, total_casos))+
      geom_bar( aes(fill= Casos), position = "dodge", stat = "identity", show.legend = TRUE)+
       scale_fill_manual(values = c("blue", "green", "turquoise", "orange"))+
-        theme(axis.text.x = element_text(angle = 45,size = 8))+
-        ggtitle("Relacion Covid-19(recuperados, tratamiento) y asegurados")+
-          labs( y = "Porcentaje de casos")+
-          labs( x = "Departamento")+
-            tema_plot
+       labs(
+        title = "Relacion Covid-19(recuperados, en tratamiento) y asegurados",
+        x = "Departamento",
+        y = "Porcentaje de Casos") +
+         tema_plot 
 
 ```
 
@@ -258,11 +254,11 @@ ggplot(data_covid9_seguros_depto_1, aes(depto, total_casos))+
 ggplot(data_covid9_seguros_depto_2, aes(depto, total_casos))+
      geom_bar( aes(fill= Casos), position = "dodge", stat = "identity", show.legend = TRUE)+
       scale_fill_manual(values = c("blue", "turquoise"))+
-        theme(axis.text.x = element_text(angle = 45,size = 8))+
-          ggtitle("Relacion recuperados Covid-19 y asegurados")+
-          labs( y = "Porcentaje de Casos")+
-            labs( x = "Departamento")+
-              tema_plot
+       labs(
+        title = "Relacion recuperados Covid-19 y asegurados",
+        x = "Departamento",
+        y = "Porcentaje de Casos") +
+        tema_plot
 
 ```
 
