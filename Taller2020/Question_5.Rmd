@@ -1,5 +1,5 @@
 ---
-title: "ANALISIS EXPLORATORIO DE DATOS DEL COVID19"
+title: "Datathon COVID-19 Bolivia. Se podría decir que un Departamento de Bolivia con más personas aseguradas tuvo más casos recuperados? Verdadero o Falso?"
 author: "Veronica Gomez"
 date: "10/9/2020"
 output: html_document
