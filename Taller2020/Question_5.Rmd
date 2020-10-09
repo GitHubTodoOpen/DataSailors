@@ -1,5 +1,5 @@
 ---
-title: "Datathon COVID-19 Bolivia. Se podría decir que un Departamento de Bolivia con más personas aseguradas tuvo más casos recuperados? Verdadero o Falso? "
+title: "ANALISIS EXPLORATORIO DE DATOS DEL COVID19"
 author: "Veronica Gomez"
 date: "10/9/2020"
 output: html_document
@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
+
 
 # El departamento x con más personas aseguradas tuvieron más recuperados. (V/F)
 
@@ -41,19 +42,36 @@ library(magrittr)
 library(dplyr)
 ```
 
+```{r echo=FALSE, eval=FALSE}
+Bueno, para tener una mejor impresión al momento de visualizar los resultados se crea un tema.
+
+```
+
+
+```{r}
+tema_plot <- 
+  theme_minimal() +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x =  element_blank(),
+    strip.background = element_rect(fill = "#eeeeee", color = NA) 
+  ) 
+```
+
 ## IMPORTAR DATOS DATA SET DATA SET ENCUESTA NACIONAL DE HOGARES
 INE_Encuenta nacional de hogares -->EH2019_Pers_csv.csv
 
 ```{r pressure, echo=FALSE}
 library(readr)
-data_encuesta_nacional_hogares <- read_delim("C:/Users/evolucion/Documents/dataThonR/CienciaDatosCovid19/Data/INE/EH2019_Pers_csv.csv",";", escape_double = FALSE, trim_ws = TRUE)
+#Si el data set no esta en la raiz sera necesario poner la ruta
+#en el parametro del nombre de achivo
+data_encuesta_nacional_hogares <-  read_delim("EH2019_Pers_csv.csv", 
+    ";", escape_double = FALSE, trim_ws = TRUE, "iconv file.pcl -f UTF-8 -t ISO-8859-1 -c") 
+
+head(data_encuesta_nacional_hogares,5)
 
 ```
 
-Mostrar los primeros 10 observaciones
-```{r}
-head(data_encuesta_nacional_hogares)
-```
 ## ORDENAR DATA SET INE ENCUESTA NACIONAL DE HOGARES
 
 ```{r}
@@ -201,7 +219,7 @@ data_covid9_seguros_depto_
 ```
 
 #----------------------------------------------
-#Transformando datos de la data data_propor_covid9_asegurados_departamento_
+#Transformando datos de la data data_covid9_seguros_depto
 1.----
 ```{r}
 data_covid9_seguros_depto_1 <- data_covid9_seguros_depto  %>%
@@ -225,10 +243,12 @@ data_covid9_seguros_depto_2
 
 ggplot(data_covid9_seguros_depto_1, aes(depto, total_casos))+
      geom_bar( aes(fill= Casos), position = "dodge", stat = "identity", show.legend = TRUE)+
-      scale_fill_manual(values = c("dark green", "green", "orange", "red"))+
+      scale_fill_manual(values = c("blue", "green", "turquoise", "orange"))+
         theme(axis.text.x = element_text(angle = 45,size = 8))+
-         ggtitle("Relacion CASOS positivos , asegurados y no por departamento")+
-          labs( y = "Numero de casos")
+        ggtitle("Relacion Covid-19(recuperados, tratamiento) y asegurados")+
+          labs( y = "Porcentaje de casos")+
+          labs( x = "Departamento")+
+            tema_plot
 
 ```
 
@@ -237,11 +257,12 @@ ggplot(data_covid9_seguros_depto_1, aes(depto, total_casos))+
 
 ggplot(data_covid9_seguros_depto_2, aes(depto, total_casos))+
      geom_bar( aes(fill= Casos), position = "dodge", stat = "identity", show.legend = TRUE)+
-      scale_fill_manual(values = c("dark green", "orange"))+
+      scale_fill_manual(values = c("blue", "turquoise"))+
         theme(axis.text.x = element_text(angle = 45,size = 8))+
-         ggtitle("Relacion CASOS positivos , asegurados y no por departamento")+
-          labs( y = "Numero de casos")+
-            labs( x = "Departamento")
+          ggtitle("Relacion recuperados Covid-19 y asegurados")+
+          labs( y = "Porcentaje de Casos")+
+            labs( x = "Departamento")+
+              tema_plot
 
 ```
 
